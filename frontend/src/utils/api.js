@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 10000
 })
 
@@ -16,24 +16,21 @@ api.interceptors.request.use(
     }
     return config
   },
-  error => {
-    return Promise.reject(error)
-  }
+  error => Promise.reject(error)
 )
 
 api.interceptors.response.use(
-  response => {
-    return response.data
-  },
+  response => response.data,
   error => {
     if (error.response) {
       switch (error.response.status) {
-        case 401:
+        case 401: {
           const authStore = useAuthStore()
           authStore.clearAuth()
           router.push('/login')
           ElMessage.error('登录已过期，请重新登录')
           break
+        }
         case 403:
           ElMessage.error('权限不足')
           break
