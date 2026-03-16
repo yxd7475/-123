@@ -12,7 +12,7 @@ def role_required(*roles):
         @wraps(f)
         @jwt_required()
         def decorated_function(*args, **kwargs):
-            current_user_id = get_jwt_identity()
+            current_user_id = int(get_jwt_identity())
             user = User.query.get(current_user_id)
             if not user or user.role not in roles:
                 return jsonify({'message': '权限不足'}), 403
@@ -37,7 +37,7 @@ def login():
     if not user.status:
         return jsonify({'message': '账户已被禁用'}), 403
     
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     
     log = OperationLog(
         user_id=user.id,
@@ -59,7 +59,7 @@ def login():
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if user:
@@ -79,7 +79,7 @@ def logout():
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -90,7 +90,7 @@ def get_profile():
 @auth_bp.route('/profile', methods=['PUT'])
 @jwt_required()
 def update_profile():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -119,7 +119,7 @@ def update_profile():
 @auth_bp.route('/change-password', methods=['POST'])
 @jwt_required()
 def change_password():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
