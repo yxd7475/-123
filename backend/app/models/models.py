@@ -213,3 +213,37 @@ class OperationLog(db.Model):
             'ip_address': self.ip_address,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
         }
+
+class PublicAccessLog(db.Model):
+    __tablename__ = 'public_access_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.String(50))
+    user_agent = db.Column(db.String(500))
+    device_type = db.Column(db.String(50))
+    browser = db.Column(db.String(100))
+    os = db.Column(db.String(100))
+    page = db.Column(db.String(100))
+    action = db.Column(db.String(100))
+    receiver_name = db.Column(db.String(50))
+    item_id = db.Column(db.Integer)
+    item_name = db.Column(db.String(100))
+    quantity = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
+            'device_type': self.device_type,
+            'browser': self.browser,
+            'os': self.os,
+            'page': self.page,
+            'action': self.action,
+            'receiver_name': self.receiver_name,
+            'item_id': self.item_id,
+            'item_name': self.item_name,
+            'quantity': self.quantity,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
+        }

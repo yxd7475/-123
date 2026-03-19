@@ -1,15 +1,122 @@
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.models.models import Item, OutboundRecord
+from app.models.models import Item, OutboundRecord, OperationLog, PublicAccessLog
 from app.utils.helpers import generate_record_no
-from datetime import datetime, date
-import pandas as pd
+from datetime import datetime, date, timezone, timedelta
+from functools import wraps
+import re
 import io
+import pandas as pd
+
+BEIJING_TZ = timezone(timedelta(hours=8))
+
+def get_beijing_time():
+    """获取北京时间"""
+    return datetime.now(BEIJING_TZ).replace(tzinfo=None)
+
+def get_real_ip():
+    """获取真实IP地址"""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    elif request.headers.get('X-Real-IP'):
+        return request.headers.get('X-Real-IP')
+    elif request.headers.get('X-Client-IP'):
+        return request.headers.get('X-Client-IP')
+    elif request.headers.get('CF-Connecting-IP'):
+        return request.headers.get('CF-Connecting-IP')
+    else:
+        return request.remote_addr or '0.0.0.0'
 
 public_bp = Blueprint('public', __name__)
 
+def parse_user_agent(user_agent):
+    """解析User-Agent获取设备信息"""
+    device_type = 'Desktop'
+    browser = 'Unknown'
+    os_name = 'Unknown'
+    
+    if not user_agent:
+        return device_type, browser, os_name
+    
+    ua = user_agent.lower()
+    
+    if 'mobile' in ua or 'android' in ua or 'iphone' in ua:
+        device_type = 'Mobile'
+    elif 'tablet' in ua or 'ipad' in ua:
+        device_type = 'Tablet'
+    
+    if 'edg' in ua:
+        browser = 'Edge'
+    elif 'chrome' in ua:
+        browser = 'Chrome'
+    elif 'firefox' in ua:
+        browser = 'Firefox'
+    elif 'safari' in ua:
+        browser = 'Safari'
+    elif 'opera' in ua or 'opr' in ua:
+        browser = 'Opera'
+    
+    if 'windows' in ua:
+        os_name = 'Windows'
+    elif 'mac' in ua:
+        os_name = 'MacOS'
+    elif 'linux' in ua:
+        os_name = 'Linux'
+    elif 'android' in ua:
+        os_name = 'Android'
+    elif 'iphone' in ua or 'ipad' in ua:
+        os_name = 'iOS'
+    
+    return device_type, browser, os_name
+
+def log_public_access(page, action, receiver_name=None, item_id=None, item_name=None, quantity=None):
+    """记录公共页面访问"""
+    user_agent = request.headers.get('User-Agent', '')
+    ip_address = get_real_ip()
+    device_type, browser, os_name = parse_user_agent(user_agent)
+    
+    access_log = PublicAccessLog(
+        ip_address=ip_address,
+        user_agent=user_agent[:500] if user_agent else '',
+        device_type=device_type,
+        browser=browser,
+        os=os_name,
+        page=page,
+        action=action,
+        receiver_name=receiver_name,
+        item_id=item_id,
+        item_name=item_name,
+        quantity=quantity,
+        created_at=get_beijing_time()
+    )
+    
+    db.session.add(access_log)
+    
+    log_description = f'公开页面访问 - 页面: {page}, 操作: {action}'
+    if receiver_name:
+        log_description += f', 领取人: {receiver_name}'
+    if item_name:
+        log_description += f', 物品: {item_name}'
+    if quantity:
+        log_description += f', 数量: {quantity}'
+    
+    operation_log = OperationLog(
+        user_id=0,
+        username='public_user',
+        operation='public_access',
+        module='public',
+        description=log_description,
+        ip_address=ip_address,
+        created_at=get_beijing_time()
+    )
+    
+    db.session.add(operation_log)
+    db.session.commit()
+
 @public_bp.route('/items', methods=['GET'])
 def get_public_items():
+    log_public_access('items', 'view_list')
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 12, type=int)
     search = request.args.get('search', '')
@@ -99,6 +206,8 @@ def public_receive():
     
     db.session.add(record)
     db.session.commit()
+    
+    log_public_access('items', 'receive', receiver_name, item.id, item.name, quantity)
     
     return jsonify({
         'message': '领取成功',
