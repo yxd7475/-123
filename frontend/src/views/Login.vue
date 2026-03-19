@@ -52,33 +52,10 @@
             </el-button>
           </el-form-item>
         </el-form>
-        
-        <div class="demo-accounts">
-          <div class="demo-header" @click="showDemo = !showDemo">
-            <span>演示账号</span>
-            <el-icon :class="{ 'is-rotate': showDemo }"><ArrowDown /></el-icon>
-          </div>
-          <transition name="slide-fade">
-            <div v-if="showDemo" class="demo-list">
-              <div class="demo-item" @click="fillDemo('admin', 'admin123')">
-                <span class="demo-role">管理员</span>
-                <span class="demo-account">admin / admin123</span>
-              </div>
-              <div class="demo-item" @click="fillDemo('operator', 'operator123')">
-                <span class="demo-role">操作员</span>
-                <span class="demo-account">operator / operator123</span>
-              </div>
-              <div class="demo-item" @click="fillDemo('viewer', 'viewer123')">
-                <span class="demo-role">查看员</span>
-                <span class="demo-account">viewer / viewer123</span>
-              </div>
-            </div>
-          </transition>
-        </div>
       </div>
       
       <div class="login-footer">
-        <p>© 2024 库房出入库管理系统 · 专业 · 高效 · 智能</p>
+        <p>© 2026 实验室库房出入库管理系统 · 专业 · 高效 · 智能</p>
       </div>
     </div>
   </div>
@@ -97,7 +74,6 @@ const authStore = useAuthStore()
 
 const formRef = ref()
 const loading = ref(false)
-const showDemo = ref(false)
 
 const form = reactive({
   username: '',
@@ -127,11 +103,6 @@ const handleLogin = async () => {
       }
     }
   })
-}
-
-const fillDemo = (username, password) => {
-  form.username = username
-  form.password = password
 }
 </script>
 
@@ -296,73 +267,6 @@ const fillDemo = (username, password) => {
   font-weight: 600;
   border-radius: 12px;
   margin-top: 8px;
-}
-
-.demo-accounts {
-  margin-top: 24px;
-  border-top: 1px solid var(--border-light);
-  padding-top: 20px;
-}
-
-.demo-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  color: var(--text-tertiary);
-  font-size: 13px;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.demo-header:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-}
-
-.demo-header .el-icon {
-  transition: transform var(--transition-fast);
-}
-
-.demo-header .el-icon.is-rotate {
-  transform: rotate(180deg);
-}
-
-.demo-list {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.demo-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.demo-item:hover {
-  background: var(--bg-tertiary);
-  transform: translateX(4px);
-}
-
-.demo-role {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.demo-account {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  font-family: monospace;
 }
 
 .login-footer {

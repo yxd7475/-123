@@ -60,6 +60,7 @@ def get_outbound_records():
     outbound_type = request.args.get('outbound_type', '')
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
+    receiver = request.args.get('receiver', '')
     
     query = OutboundRecord.query
     
@@ -78,6 +79,9 @@ def get_outbound_records():
     
     if end_date:
         query = query.filter(OutboundRecord.created_at <= datetime.strptime(end_date + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+    
+    if receiver:
+        query = query.filter(OutboundRecord.receiver.contains(receiver))
     
     pagination = query.order_by(OutboundRecord.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
@@ -182,8 +186,11 @@ def batch_import_outbound():
         return jsonify({'message': '不支持的文件格式，请上传Excel或CSV文件'}), 400
     
     try:
-        filename = secure_filename(file.filename)
-        file_ext = filename.rsplit('.', 1)[1].lower()
+        original_filename = file.filename
+        file_ext = original_filename.rsplit('.', 1)[-1].lower() if '.' in original_filename else ''
+        
+        if not file_ext or file_ext not in ALLOWED_EXTENSIONS:
+            return jsonify({'message': f'不支持的文件格式，请上传Excel或CSV文件（当前扩展名: {file_ext or "无"}）'}), 400
         
         if file_ext == 'csv':
             df = pd.read_csv(file, encoding='utf-8-sig')
@@ -294,6 +301,69 @@ def batch_import_outbound():
         
     except Exception as e:
         return jsonify({'message': f'导入失败: {str(e)}'}), 500
+
+@outbound_bp.route('/export', methods=['GET'])
+@jwt_required()
+def export_outbound_records():
+    search = request.args.get('search', '')
+    outbound_type = request.args.get('outbound_type', '')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    receiver = request.args.get('receiver', '')
+    
+    query = OutboundRecord.query
+    
+    if search:
+        query = query.filter(
+            (OutboundRecord.record_no.contains(search)) |
+            (OutboundRecord.item_code.contains(search)) |
+            (OutboundRecord.item_name.contains(search))
+        )
+    
+    if outbound_type:
+        query = query.filter(OutboundRecord.outbound_type == outbound_type)
+    
+    if start_date:
+        query = query.filter(OutboundRecord.created_at >= datetime.strptime(start_date, '%Y-%m-%d'))
+    
+    if end_date:
+        query = query.filter(OutboundRecord.created_at <= datetime.strptime(end_date + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+    
+    if receiver:
+        query = query.filter(OutboundRecord.receiver.contains(receiver))
+    
+    records = query.order_by(OutboundRecord.created_at.desc()).all()
+    
+    data = []
+    for record in records:
+        data.append({
+            '出库单号': record.record_no,
+            '物品编码': record.item_code,
+            '物品名称': record.item_name,
+            '出库类型': OUTBOUND_TYPES.get(record.outbound_type, record.outbound_type),
+            '数量': record.quantity,
+            '单价': record.unit_price,
+            '总价': record.total_price,
+            '去向': record.destination or '',
+            '领用人': record.receiver or '',
+            '经手人': record.handler or '',
+            '出库时间': record.created_at.strftime('%Y-%m-%d %H:%M:%S') if record.created_at else '',
+            '备注': record.remark or ''
+        })
+    
+    df = pd.DataFrame(data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='出库记录')
+    output.seek(0)
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=f'出库记录_{datetime.now().strftime("%Y%m%d")}.xlsx'
+    )
 
 @outbound_bp.route('/template', methods=['GET'])
 @jwt_required()

@@ -25,12 +25,19 @@
             @change="handleDateChange"
           />
         </el-form-item>
+        <el-form-item label="领取人">
+          <el-input v-model="filters.receiver" placeholder="请输入领取人" clearable />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchRecords">查询</el-button>
           <el-button type="success" @click="handleAdd" v-if="authStore.hasAnyRole(['admin', 'operator'])">新增出库</el-button>
           <el-button type="warning" @click="importDialogVisible = true" v-if="authStore.hasAnyRole(['admin', 'operator'])">
             <el-icon><Upload /></el-icon>
             一键预领
+          </el-button>
+          <el-button type="info" @click="handleExport">
+            <el-icon><Download /></el-icon>
+            导出
           </el-button>
         </el-form-item>
       </el-form>
@@ -54,6 +61,7 @@
           <template #default="{ row }">¥{{ row.total_price.toFixed(2) }}</template>
         </el-table-column>
         <el-table-column prop="destination" label="去向" width="120" />
+        <el-table-column prop="receiver" label="领取人" width="100" />
         <el-table-column prop="handler" label="经手人" width="100" />
         <el-table-column prop="created_at" label="出库时间" width="180" />
         <el-table-column label="操作" width="100" fixed="right">
@@ -249,7 +257,8 @@ const filters = reactive({
   search: '',
   outbound_type: '',
   start_date: '',
-  end_date: ''
+  end_date: '',
+  receiver: ''
 })
 
 const pagination = reactive({
@@ -413,6 +422,42 @@ const downloadTemplate = async () => {
   } catch (error) {
     console.error(error)
     ElMessage.error('下载模板失败')
+  }
+}
+
+const handleExport = async () => {
+  try {
+    const params = new URLSearchParams({
+      search: filters.search,
+      outbound_type: filters.outbound_type,
+      start_date: filters.start_date,
+      end_date: filters.end_date,
+      receiver: filters.receiver
+    })
+    
+    const response = await fetch(`/api/outbound/export?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('导出失败')
+    }
+    
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '出库记录.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('导出失败')
   }
 }
 

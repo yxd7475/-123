@@ -29,7 +29,7 @@
     </main>
     
     <footer class="public-footer">
-      <p>© 2024 物品领用系统</p>
+      <p>© 2026 实验室库房出入库管理系统</p>
     </footer>
   </div>
 </template>
