@@ -320,3 +320,137 @@ def download_inbound_template():
         as_attachment=True,
         download_name='批量入库模板.xlsx'
     )
+
+@inbound_bp.route('/export', methods=['GET'])
+@jwt_required()
+def export_inbound_records():
+    search = request.args.get('search', '')
+    inbound_type = request.args.get('inbound_type', '')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    
+    query = InboundRecord.query
+    
+    if search:
+        query = query.filter(
+            (InboundRecord.record_no.contains(search)) |
+            (InboundRecord.item_code.contains(search)) |
+            (InboundRecord.item_name.contains(search))
+        )
+    
+    if inbound_type:
+        query = query.filter(InboundRecord.inbound_type == inbound_type)
+    
+    if start_date:
+        query = query.filter(InboundRecord.created_at >= datetime.strptime(start_date, '%Y-%m-%d'))
+    
+    if end_date:
+        query = query.filter(InboundRecord.created_at <= datetime.strptime(end_date + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+    
+    records = query.order_by(InboundRecord.created_at.desc()).all()
+    
+    data = []
+    for record in records:
+        data.append({
+            '入库单号': record.record_no,
+            '物品编码': record.item_code,
+            '物品名称': record.item_name,
+            '入库类型': INBOUND_TYPES.get(record.inbound_type, record.inbound_type),
+            '数量': record.quantity,
+            '单价': record.unit_price,
+            '总价': record.total_price,
+            '来源': record.source or '',
+            '供应商': record.supplier or '',
+            '经手人': record.handler or '',
+            '入库时间': record.created_at.strftime('%Y-%m-%d %H:%M:%S') if record.created_at else '',
+            '备注': record.remark or ''
+        })
+    
+    df = pd.DataFrame(data)
+    
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='入库记录')
+    output.seek(0)
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=f'入库记录_{datetime.now().strftime("%Y%m%d")}.xlsx'
+    )
+
+@inbound_bp.route('/<int:record_id>', methods=['PUT'])
+@jwt_required()
+def update_inbound_record(record_id):
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    
+    record = InboundRecord.query.get(record_id)
+    if not record:
+        return jsonify({'message': '记录不存在'}), 404
+    
+    item = Item.query.get(record.item_id)
+    if not item:
+        return jsonify({'message': '物品不存在'}), 404
+    
+    quantity_diff = data.get('quantity', record.quantity)
+    if quantity_diff != 0:
+        if item.quantity - record.quantity + quantity_diff < 0:
+            return jsonify({'message': '库存不足'}), 400
+        item.quantity = item.quantity - record.quantity + quantity_diff
+        record.quantity = quantity_diff
+    
+    if 'unit_price' in data:
+        record.unit_price = data['unit_price']
+        record.total_price = record.quantity * data['unit_price']
+    
+    if 'source' in data:
+        record.source = data['source']
+    if 'supplier' in data:
+        record.supplier = data['supplier']
+    if 'handler' in data:
+        record.handler = data['handler']
+    if 'remark' in data:
+        record.remark = data['remark']
+    
+    log = OperationLog(
+        user_id=current_user_id,
+        operation='编辑入库',
+        module='入库管理',
+        description=f'编辑入库单号: {record.record_no}'
+    )
+    db.session.add(log)
+    db.session.commit()
+    
+    return jsonify({
+        'message': '更新成功',
+        'record': record.to_dict()
+    }), 200
+
+@inbound_bp.route('/<int:record_id>', methods=['DELETE'])
+@jwt_required()
+@role_required('admin')
+def delete_inbound_record(record_id):
+    current_user_id = get_jwt_identity()
+    
+    record = InboundRecord.query.get(record_id)
+    if not record:
+        return jsonify({'message': '记录不存在'}), 404
+    
+    item = Item.query.get(record.item_id)
+    if item:
+        item.quantity -= record.quantity
+    
+    db.session.delete(record)
+    
+    log = OperationLog(
+        user_id=current_user_id,
+        operation='删除入库',
+        module='入库管理',
+        description=f'删除入库单号: {record.record_no}'
+    )
+    db.session.add(log)
+    db.session.commit()
+    
+    return jsonify({'message': '删除成功'}), 200

@@ -102,6 +102,62 @@
       />
     </div>
     
+    <!-- 查看详情对话框 -->
+    <el-dialog v-model="viewDialogVisible" title="入库记录详情" width="600px">
+      <el-descriptions :column="2" border v-if="currentRecord">
+        <el-descriptions-item label="入库单号">{{ currentRecord.record_no }}</el-descriptions-item>
+        <el-descriptions-item label="物品编码">{{ currentRecord.item_code }}</el-descriptions-item>
+        <el-descriptions-item label="物品名称">{{ currentRecord.item_name }}</el-descriptions-item>
+        <el-descriptions-item label="入库类型">{{ inboundTypes[currentRecord.inbound_type] || currentRecord.inbound_type }}</el-descriptions-item>
+        <el-descriptions-item label="数量">{{ currentRecord.quantity }}</el-descriptions-item>
+        <el-descriptions-item label="单价">¥{{ currentRecord.unit_price?.toFixed(2) || '0.00' }}</el-descriptions-item>
+        <el-descriptions-item label="总价">¥{{ currentRecord.total_price?.toFixed(2) || '0.00' }}</el-descriptions-item>
+        <el-descriptions-item label="来源">{{ currentRecord.source || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="供应商">{{ currentRecord.supplier || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="经手人">{{ currentRecord.handler || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="入库时间">{{ currentRecord.created_at }}</el-descriptions-item>
+        <el-descriptions-item label="备注">{{ currentRecord.remark || '-' }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <el-button @click="viewDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- 编辑对话框 -->
+    <el-dialog v-model="editDialogVisible" title="编辑入库记录" width="600px">
+      <el-form :model="editForm" label-width="100px" v-if="editForm">
+        <el-form-item label="入库单号">
+          <el-input v-model="editForm.record_no" disabled />
+        </el-form-item>
+        <el-form-item label="物品名称">
+          <el-input v-model="editForm.item_name" disabled />
+        </el-form-item>
+        <el-form-item label="数量" required>
+          <el-input-number v-model="editForm.quantity" :min="1" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="单价" required>
+          <el-input-number v-model="editForm.unit_price" :min="0" :precision="2" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="来源">
+          <el-input v-model="editForm.source" />
+        </el-form-item>
+        <el-form-item label="供应商">
+          <el-input v-model="editForm.supplier" />
+        </el-form-item>
+        <el-form-item label="经手人">
+          <el-input v-model="editForm.handler" />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="editForm.remark" type="textarea" :rows="2" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEdit" :loading="editLoading">保存</el-button>
+      </template>
+    </el-dialog>
+    
+    <!-- 导入对话框 -->
     <el-dialog v-model="importDialogVisible" title="一键入库" width="500px">
       <el-upload
         drag
@@ -151,6 +207,13 @@ const filters = reactive({
 const importDialogVisible = ref(false)
 const importLoading = ref(false)
 const importFile = ref(null)
+
+const viewDialogVisible = ref(false)
+const currentRecord = ref(null)
+
+const editDialogVisible = ref(false)
+const editLoading = ref(false)
+const editForm = ref(null)
 
 const isMobile = computed(() => window.innerWidth <= 768)
 
@@ -257,11 +320,46 @@ const handleImportSubmit = async () => {
 }
 
 const handleView = (row) => {
-  ElMessage.info(`查看详情: ${row.record_no}`)
+  currentRecord.value = row
+  viewDialogVisible.value = true
 }
 
 const handleEdit = (row) => {
-  ElMessage.info(`编辑: ${row.record_no}`)
+  editForm.value = {
+    id: row.id,
+    record_no: row.record_no,
+    item_name: row.item_name,
+    quantity: row.quantity,
+    unit_price: row.unit_price,
+    source: row.source || '',
+    supplier: row.supplier || '',
+    handler: row.handler || '',
+    remark: row.remark || ''
+  }
+  editDialogVisible.value = true
+}
+
+const submitEdit = async () => {
+  if (!editForm.value) return
+  
+  editLoading.value = true
+  try {
+    await api.put(`/inbound/${editForm.value.id}`, {
+      quantity: editForm.value.quantity,
+      unit_price: editForm.value.unit_price,
+      source: editForm.value.source,
+      supplier: editForm.value.supplier,
+      handler: editForm.value.handler,
+      remark: editForm.value.remark
+    })
+    ElMessage.success('更新成功')
+    editDialogVisible.value = false
+    fetchRecords()
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '更新失败')
+  } finally {
+    editLoading.value = false
+  }
 }
 
 const handleDelete = (row) => {
@@ -269,9 +367,14 @@ const handleDelete = (row) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
-  }).then(() => {
-    ElMessage.success('删除成功')
-    fetchRecords()
+  }).then(async () => {
+    try {
+      await api.delete(`/inbound/${row.id}`)
+      ElMessage.success('删除成功')
+      fetchRecords()
+    } catch (error) {
+      ElMessage.error(error.response?.data?.message || '删除失败')
+    }
   }).catch(() => {})
 }
 
