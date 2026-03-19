@@ -122,33 +122,36 @@ onMounted(() => {
 .public-page {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  padding-top: 8px;
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
 }
 
 .page-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: #94a3b8;
   margin: 0;
 }
 
 .search-section {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.search-section .el-input {
-  flex: 1;
+.search-section .el-button {
+  width: 100%;
 }
 
 .records-container {
@@ -176,28 +179,28 @@ onMounted(() => {
 .records-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .record-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(226, 232, 240, 0.5);
-  padding: 20px;
+  padding: 16px;
   transition: all 0.2s ease;
 }
 
-.record-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.record-card:active {
+  transform: scale(0.98);
 }
 
 .record-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .record-info {
@@ -214,15 +217,15 @@ onMounted(() => {
 }
 
 .record-time {
-  font-size: 13px;
+  font-size: 12px;
   color: #94a3b8;
 }
 
 .record-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  padding-top: 16px;
+  padding-top: 12px;
   border-top: 1px solid rgba(226, 232, 240, 0.3);
 }
 
@@ -233,28 +236,60 @@ onMounted(() => {
 }
 
 .detail-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #94a3b8;
 }
 
 .detail-value {
-  font-size: 14px;
+  font-size: 13px;
   color: #0f172a;
   font-weight: 500;
 }
 
 .detail-value.mono {
   font-family: monospace;
-  font-size: 13px;
+  font-size: 12px;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
+  .public-page {
+    padding: 0 24px;
+  }
+  
+  .page-header {
+    margin-bottom: 24px;
+    padding-top: 0;
+  }
+  
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+  
   .search-section {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 12px;
+  }
+  
+  .search-section .el-button {
+    width: auto;
+  }
+  
+  .records-list {
+    gap: 16px;
+  }
+  
+  .record-card {
+    padding: 20px;
   }
   
   .record-details {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
   }
 }
 </style>

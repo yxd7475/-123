@@ -23,7 +23,7 @@
         size="large"
         clearable
         @change="handleSearch"
-        style="width: 160px"
+        class="category-select"
       >
         <el-option
           v-for="cat in categories"
@@ -100,6 +100,7 @@
         :page-size="pageSize"
         :total="total"
         layout="prev, pager, next"
+        :small="isMobile"
         @current-change="fetchItems"
       />
     </div>
@@ -107,8 +108,9 @@
     <el-dialog
       v-model="receiveDialogVisible"
       title="领取物品"
-      width="400px"
+      :width="isMobile ? '90%' : '400px'"
       :close-on-click-modal="false"
+      top="5vh"
     >
       <div class="receive-item-info" v-if="currentItem">
         <div class="receive-item-header">
@@ -153,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, Box, Loading, Picture } from '@element-plus/icons-vue'
 import api from '@/utils/api'
@@ -175,6 +177,10 @@ const receiveForm = reactive({
   quantity: 1,
   phone: '',
   purpose: ''
+})
+
+const isMobile = computed(() => {
+  return window.innerWidth <= 768
 })
 
 const getImageUrl = (image) => {
@@ -274,35 +280,42 @@ onMounted(() => {
 .public-page {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  padding-top: 8px;
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #0f172a;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
 }
 
 .page-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: #94a3b8;
   margin: 0;
 }
 
 .search-bar {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.category-select {
+  width: 100% !important;
 }
 
 .items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   min-height: 200px;
 }
 
@@ -310,19 +323,18 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid rgba(226, 232, 240, 0.5);
   overflow: hidden;
   transition: all 0.25s ease;
 }
 
-.item-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+.item-card:active {
+  transform: scale(0.98);
 }
 
 .item-image-wrapper {
-  height: 180px;
+  height: 120px;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
   position: relative;
   overflow: hidden;
@@ -356,42 +368,45 @@ onMounted(() => {
 }
 
 .item-content {
-  padding: 16px;
+  padding: 12px;
 }
 
 .item-name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #0f172a;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .item-spec {
-  font-size: 13px;
+  font-size: 12px;
   color: #94a3b8;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .item-unit {
-  font-size: 12px;
+  font-size: 11px;
   color: #64748b;
   background: #f1f5f9;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
 }
 
 .item-stock {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: #10b981;
 }
@@ -406,10 +421,20 @@ onMounted(() => {
   justify-content: space-between;
 }
 
+.item-actions .el-tag {
+  font-size: 11px;
+}
+
+.item-actions .el-button {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
 .pagination-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 32px;
+  margin-top: 16px;
+  padding-bottom: 16px;
 }
 
 .receive-item-info {
@@ -424,30 +449,106 @@ onMounted(() => {
 }
 
 .receive-item-header h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #0f172a;
   margin: 0;
 }
 
 .receive-item-spec {
-  font-size: 14px;
+  font-size: 13px;
   color: #94a3b8;
   margin: 0;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 480px) {
   .items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .item-image-wrapper {
+    height: 140px;
+  }
+}
+
+@media (min-width: 768px) {
+  .public-page {
+    padding: 0 24px;
+  }
+  
+  .page-header {
+    margin-bottom: 24px;
+    padding-top: 0;
+  }
+  
+  .page-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
   }
   
   .search-bar {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 24px;
   }
   
-  .search-bar .el-select {
-    width: 100% !important;
+  .category-select {
+    width: 160px !important;
+  }
+  
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .item-image-wrapper {
+    height: 180px;
+  }
+  
+  .item-content {
+    padding: 16px;
+  }
+  
+  .item-name {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  
+  .item-spec {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  
+  .item-unit {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .item-stock {
+    font-size: 13px;
+  }
+  
+  .item-actions .el-tag {
+    font-size: 12px;
+  }
+  
+  .item-actions .el-button {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+  
+  .pagination-wrapper {
+    margin-top: 32px;
+    padding-bottom: 0;
+  }
+  
+  .receive-item-header h3 {
+    font-size: 18px;
   }
 }
 </style>

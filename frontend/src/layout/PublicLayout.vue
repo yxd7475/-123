@@ -59,8 +59,8 @@ import { Box, Goods, List } from '@element-plus/icons-vue'
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
-  height: 64px;
+  padding: 0 16px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,23 +69,23 @@ import { Box, Goods, List } from '@element-plus/icons-vue'
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .logo-text {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #0f172a;
 }
@@ -100,7 +100,7 @@ import { Box, Goods, List } from '@element-plus/icons-vue'
 .nav-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 16px;
   display: flex;
   gap: 8px;
 }
@@ -108,11 +108,11 @@ import { Box, Goods, List } from '@element-plus/icons-vue'
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 16px 20px;
+  gap: 6px;
+  padding: 12px 16px;
   color: #64748b;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
@@ -131,7 +131,7 @@ import { Box, Goods, List } from '@element-plus/icons-vue'
   flex: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   width: 100%;
 }
 
@@ -140,27 +140,53 @@ import { Box, Goods, List } from '@element-plus/icons-vue'
   backdrop-filter: blur(8px) saturate(180%);
   -webkit-backdrop-filter: blur(8px) saturate(180%);
   border-top: 1px solid rgba(226, 232, 240, 0.3);
-  padding: 16px;
+  padding: 12px;
   text-align: center;
 }
 
 .public-footer p {
   color: #94a3b8;
-  font-size: 13px;
+  font-size: 12px;
   margin: 0;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .header-content {
-    padding: 0 16px;
+    padding: 0 24px;
+    height: 64px;
+  }
+  
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 20px;
+  }
+  
+  .logo-text {
+    font-size: 18px;
   }
   
   .nav-content {
-    padding: 0 16px;
+    padding: 0 24px;
+  }
+  
+  .nav-item {
+    gap: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
   }
   
   .public-main {
+    padding: 24px;
+  }
+  
+  .public-footer {
     padding: 16px;
+  }
+  
+  .public-footer p {
+    font-size: 13px;
   }
 }
 </style>

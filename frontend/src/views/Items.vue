@@ -1043,6 +1043,112 @@ onMounted(() => {
   justify-content: flex-end;
 }
 
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .header-title {
+    font-size: 20px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .search-bar {
+    flex-direction: column;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .table-container :deep(.el-table) {
+    font-size: 12px;
+  }
+  
+  .table-container :deep(.el-table th) {
+    font-size: 11px;
+    padding: 8px 0;
+  }
+  
+  .table-container :deep(.el-table td) {
+    padding: 8px 0;
+  }
+  
+  .action-cell {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .action-primary,
+  .action-secondary {
+    padding: 0 10px;
+    font-size: 11px;
+  }
+  
+  .action-more {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .pagination-container {
+    justify-content: center;
+  }
+  
+  .pagination-container :deep(.el-pagination) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  :deep(.el-dialog) {
+    width: 95% !important;
+    max-width: 500px;
+    margin: 5vh auto !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  :deep(.el-form-item__label) {
+    font-size: 13px;
+  }
+  
+  :deep(.el-input__inner) {
+    font-size: 14px;
+  }
+  
+  .image-uploader {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .image-uploader-icon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .image-preview {
+    width: 80px;
+    height: 80px;
+  }
+}
+
 :deep(.el-dialog) {
   border-radius: 16px;
   overflow: hidden;
@@ -1181,6 +1287,94 @@ onMounted(() => {
 .no-image {
   color: #ccc;
   font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 0;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .header-actions .el-button {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .search-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .search-bar :deep(.el-input),
+  .search-bar :deep(.el-select) {
+    width: 100% !important;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .table-container :deep(.el-table) {
+    min-width: 800px;
+  }
+  
+  .table-container :deep(.el-table__body-wrapper) {
+    overflow-x: auto;
+  }
+  
+  .pagination-container {
+    justify-content: center;
+  }
+  
+  .pagination-container :deep(.el-pagination) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  :deep(.el-dialog) {
+    width: 95% !important;
+    margin: 5vh auto !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  :deep(.el-form-item__label) {
+    float: none;
+    text-align: left;
+    margin-bottom: 8px;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+  
+  .image-upload-wrapper {
+    width: 100%;
+  }
+  
+  .image-uploader {
+    width: 100px;
+    height: 100px;
+  }
 }
 
 .item-info {

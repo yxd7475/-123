@@ -44,32 +44,38 @@
     </div>
 
     <div class="table-container">
-      <el-table :data="records" stripe>
-        <el-table-column prop="record_no" label="出库单号" width="180" />
-        <el-table-column prop="item_code" label="物品编码" width="120" />
-        <el-table-column prop="item_name" label="物品名称" width="150" />
-        <el-table-column prop="outbound_type" label="出库类型" width="120">
-          <template #default="{ row }">
-            <el-tag type="warning">{{ outboundTypes[row.outbound_type] || row.outbound_type }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="quantity" label="数量" width="100" />
-        <el-table-column prop="unit_price" label="单价" width="100">
-          <template #default="{ row }">¥{{ row.unit_price.toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column prop="total_price" label="总价" width="120">
-          <template #default="{ row }">¥{{ row.total_price.toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column prop="destination" label="去向" width="120" />
-        <el-table-column prop="receiver" label="领取人" width="100" />
-        <el-table-column prop="handler" label="经手人" width="100" />
-        <el-table-column prop="created_at" label="出库时间" width="180" />
-        <el-table-column label="操作" width="100" fixed="right">
-          <template #default="{ row }">
-            <el-button link type="primary" @click="handleView(row)">查看</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-wrapper">
+        <el-table :data="records" stripe style="min-width: 900px">
+          <el-table-column prop="record_no" label="出库单号" width="160" />
+          <el-table-column prop="item_code" label="物品编码" width="120" />
+          <el-table-column prop="item_name" label="物品名称" width="150" />
+          <el-table-column prop="outbound_type" label="出库类型" width="120">
+            <template #default="{ row }">
+              <el-tag type="warning">{{ outboundTypes[row.outbound_type] || row.outbound_type }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="quantity" label="数量" width="100" />
+          <el-table-column prop="unit_price" label="单价" width="100">
+            <template #default="{ row }">¥{{ row.unit_price?.toFixed(2) || '0.00' }}</template>
+          </el-table-column>
+          <el-table-column prop="total_price" label="总价" width="120">
+            <template #default="{ row }">¥{{ row.total_price?.toFixed(2) || '0.00' }}</template>
+          </el-table-column>
+          <el-table-column prop="destination" label="去向" width="120" />
+          <el-table-column prop="receiver" label="领取人" width="100" />
+          <el-table-column prop="handler" label="经手人" width="100" />
+          <el-table-column prop="created_at" label="出库时间" width="160">
+            <template #default="{ row }">
+              {{ new Date(row.created_at).toLocaleString('zh-CN') }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="handleView(row)">查看</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
       
       <div class="pagination-container">
         <el-pagination
@@ -517,3 +523,151 @@ onMounted(() => {
   fetchItemList()
 })
 </script>
+
+<style scoped>
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.filter-bar {
+  margin-bottom: 20px;
+}
+
+.filter-bar :deep(.el-form-item) {
+  margin-bottom: 12px;
+}
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .page-header h2 {
+    font-size: 20px;
+  }
+  
+  .filter-bar :deep(.el-form) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .filter-bar :deep(.el-form-item) {
+    margin-right: 0;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+  
+  .filter-bar :deep(.el-form-item .el-input),
+  .filter-bar :deep(.el-form-item .el-select),
+  .filter-bar :deep(.el-form-item .el-date-editor) {
+    width: 100% !important;
+  }
+  
+  .filter-bar :deep(.el-form-item:last-child) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .filter-bar :deep(.el-form-item:last-child .el-button) {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .table-container {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .table-wrapper :deep(.el-table) {
+    min-width: 900px;
+    font-size: 12px;
+  }
+  
+  .table-wrapper :deep(.el-table th) {
+    font-size: 11px;
+    padding: 8px 0;
+  }
+  
+  .table-wrapper :deep(.el-table td) {
+    padding: 8px 0;
+  }
+  
+  .pagination-container {
+    justify-content: center;
+  }
+  
+  .pagination-container :deep(.el-pagination) {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .pagination-container :deep(.el-pagination__sizes),
+  .pagination-container :deep(.el-pagination__jump) {
+    display: none;
+  }
+  
+  :deep(.el-dialog) {
+    width: 95% !important;
+    margin: 5vh auto !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  :deep(.el-form-item__label) {
+    float: none;
+    text-align: left;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  
+  :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
+  
+  :deep(.el-col-12) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  :deep(.el-row) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  :deep(.el-descriptions) {
+    width: 100%;
+  }
+  
+  :deep(.el-descriptions__label) {
+    width: 80px !important;
+  }
+}
+</style>

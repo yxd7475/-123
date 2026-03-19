@@ -814,4 +814,136 @@ onMounted(() => {
 .header-icon.public-icon {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 }
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 0;
+  }
+  
+  .page-header h2 {
+    font-size: 20px;
+  }
+  
+  .page-desc {
+    font-size: 13px;
+  }
+  
+  :deep(.el-col) {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 16px;
+  }
+  
+  :deep(.el-row) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .settings-card {
+    min-width: 0;
+  }
+  
+  .settings-card,
+  .settings-card * {
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    word-break: break-word;
+    white-space: normal;
+  }
+  
+  .settings-card :deep(.el-card__header) {
+    padding: 16px;
+  }
+  
+  .settings-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+  
+  .card-header {
+    flex-wrap: wrap;
+  }
+  
+  .header-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .header-title {
+    font-size: 15px;
+  }
+  
+  .header-desc {
+    font-size: 11px;
+  }
+  
+  .avatar-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+  
+  .user-info-text h3 {
+    font-size: 16px;
+  }
+  
+  .settings-form :deep(.el-form-item__label) {
+    font-size: 13px;
+  }
+  
+  .info-item {
+    padding: 12px;
+  }
+  
+  .info-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .info-value {
+    font-size: 13px;
+  }
+  
+  .admin-action {
+    padding: 16px 12px;
+  }
+  
+  .action-icon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .action-text {
+    font-size: 14px;
+  }
+  
+  .url-input-wrapper {
+    flex-direction: column;
+  }
+  
+  .url-input-wrapper .el-button {
+    width: 100%;
+  }
+  
+  .public-stats {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stat-item {
+    padding: 16px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .public-actions {
+    flex-direction: column;
+  }
+  
+  .public-actions .el-button {
+    width: 100%;
+  }
+}
 </style>
