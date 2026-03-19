@@ -13,14 +13,16 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
+      host: '0.0.0.0',
       port: 3000,
+      strictPort: true,
+      allowedHosts: true,
       proxy: {
         '/api': {
-          target: env.VITE_DEV_API_TARGET || 'http://localhost:5000',
+          target: env.VITE_DEV_API_TARGET || 'http://127.0.0.1:5000',
           changeOrigin: true
         }
       }
     }
   }
-}
-)
+})
